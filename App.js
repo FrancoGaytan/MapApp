@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import MapLibreGL from '@maplibre/maplibre-react-native';
+import MapView from 'react-native-map-clustering';
 import FieldInfoModal from './src/components/FieldInfoModal';
 import AddFieldModal from './src/components/AddFieldModal';
 import NearbyFilter from './src/components/NearbyFilter';
@@ -127,18 +127,16 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <MapLibreGL.MapView
+      <MapView
         style={styles.map}
-        styleURL="https://demotiles.maplibre.org/style.json"
         onPress={handleMapPress}
+        initialRegion={currentLocation ? {
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        } : ROSARIO_CENTER}
       >
-        <MapLibreGL.Camera
-          zoomLevel={13}
-          centerCoordinate={currentLocation ? [
-            currentLocation.longitude,
-            currentLocation.latitude
-          ] : [ROSARIO_CENTER.longitude, ROSARIO_CENTER.latitude]}
-        />
         {Array.isArray(soccerFields) && soccerFields.filter((field) => {
           if (!field) return false;
           // ensure numeric coords
@@ -159,7 +157,7 @@ export default function App() {
               key={field.id || Math.random().toString()}
               coordinate={{ latitude: lat, longitude: lon }}
               type="field"
-                sport={field.type}
+              sport={field.type}
               title={field.name || 'Cancha'}
               description={desc}
               onPress={() => handleMarkerPress(field)}
@@ -174,7 +172,7 @@ export default function App() {
         {currentLocation && (
           <CustomImageMarker coordinate={currentLocation} type="user" title="Tu ubicación" />
         )}
-      </MapLibreGL.MapView>
+      </MapView>
 
       {/* Botón para activar modo agregar */}
       <TouchableOpacity

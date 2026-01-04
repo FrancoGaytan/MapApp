@@ -61,8 +61,4 @@ cd ios && pod install && npx react-native run-ios
 - If you see file-locking errors on Windows when deleting `node_modules`, close Metro, editors, and any terminal using files; try again.
 - If you hit dependency errors with workspaces, prefer installing the published package `@maplibre/maplibre-react-native` (already added to `package.json`).
 
-If you want, I can:
-- Add `expo-dev-client` to `package.json` and run the installs here (may fail because builds require EAS and native toolchain).
-- Run `npx expo prebuild` here to generate `android/` and `ios/` dirs (only useful if you have SDKs and can run native builds locally or via EAS).
-
-Which of the above do you want me to do next?
+This file was left intentionally blank after removing MapLibre support.

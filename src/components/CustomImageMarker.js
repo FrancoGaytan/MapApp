@@ -1,14 +1,12 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import MapLibreGL from '@maplibre/maplibre-react-native';
+import { Marker } from 'react-native-maps';
 
 const CustomImageMarker = memo(({ coordinate, title, description, onPress, type = 'field', sport }) => {
-  // Define styles based on type
   const isUser = type === 'user';
   const backgroundColor = isUser ? '#2196F3' : '#4CAF50';
   const borderColor = 'white';
 
-  // Emoji/Icon mapping by sport
   let icon = '⚽';
   if (isUser) icon = '👤';
   else if (sport) {
@@ -25,17 +23,17 @@ const CustomImageMarker = memo(({ coordinate, title, description, onPress, type 
   }
 
   return (
-    <MapLibreGL.PointAnnotation
-      id={`marker-${coordinate.latitude}-${coordinate.longitude}`}
-      coordinate={[coordinate.longitude, coordinate.latitude]}
-      onSelected={onPress}
+    <Marker
+      coordinate={coordinate}
+      onPress={onPress}
+      tracksViewChanges={false}
     >
       <View style={styles.shadowContainer}>
         <View style={[styles.innerCircle, { backgroundColor, borderColor }]}>
           <Text style={styles.markerIcon}>{icon}</Text>
         </View>
       </View>
-    </MapLibreGL.PointAnnotation>
+    </Marker>
   );
 });
 
