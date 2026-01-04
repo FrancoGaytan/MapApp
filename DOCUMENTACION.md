@@ -120,11 +120,35 @@ npm start        # inicia Expo
 - Si la app no recibe la ubicación en un dispositivo real: revisar permisos del sistema (Settings → App → Permisos) y el firewall que podría bloquear el acceso al servidor local.
 - Si el filtro no funciona: verificar que `currentLocation` tenga valores válidos (`console.log`) y que las coordenadas de las canchas sean números (no strings).
 
+- Si el filtro no funciona: verificar que `currentLocation` tenga valores válidos (`console.log`) y que las coordenadas de las canchas sean números (no strings).
+
+## 11) Clustering in‑App (implementación de esta rama)
+
+Se implementó un clustering simple y seguro dentro de la app para evitar tocar `node_modules` y mitigar problemas observados con la librería externa.
+
+- Componentes creados:
+  - `src/components/MapArea.js`: concentra la lógica del `MapView`, filtrado, agrupado (clustering) y renderizado de marcadores y clusters.
+  - `src/components/AddButton.js` y `src/components/buttonStyles.js`: componente modular para el botón de "Agregar Cancha".
+  - `constants.js`: valores constantes (p. ej. `ROSARIO_CENTER`).
+
+- Algoritmo de clustering:
+  - Agrupado por grilla: las canchas se agrupan redondeando latitud/longitud a un número de decimales variable según el zoom.
+  - Precisión dinámica: el número de decimales depende de `latitudeDelta` (zoom). A mayor zoom, más decimales → menos agrupamiento; a menor zoom, menos decimales → más agrupamiento.
+  - Cada grupo produce un cluster con centro (promedio) y conteo; grupos de 1 se muestran como marcadores individuales.
+
+- Comportamiento UI:
+  - Los clusters son `Marker` con un `View` que muestra el conteo.
+  - Presionar un cluster hace `animateToRegion` hacia su centro para hacer zoom y desplegar miembros.
+  - Los marcadores individuales usan `src/components/CustomImageMarker.js`.
+
+- Cómo probarlo:
+  1. Iniciar servidor local (`npm run server`) y Expo (`npm start`).
+  2. Abrir la app en Expo Go (emulador o dispositivo físico). Verificar que aparezcan marcadores.
+  3. Alejar/Acercar el mapa y observar cómo cambian los clusters según el zoom.
+  4. Presionar un cluster: el mapa debe animar hacia el centro y, tras suficiente zoom, mostrar miembros individuales.
+
+- Notas:
+  - La lógica del mapa quedó aislada en `MapArea` para facilitar futuras integraciones con librerías externas.
+  - No se editaron archivos en `node_modules`; cualquier corrección a la librería externa debe proponerse como PR upstream.
+
 ---
-
-Si querés, puedo:
-
-- Añadir un script para detectar la IP de la máquina automáticamente y reemplazarla en `App.js` para pruebas con Expo Go.
-- Generar pequeñas pruebas unitarias para la función `distanceKm`.
-
-Archivo creado: [DOCUMENTACION.md](DOCUMENTACION.md)
