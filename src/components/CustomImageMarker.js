@@ -26,7 +26,6 @@ const CustomImageMarker = memo(({ coordinate, title, description, onPress, type 
     <Marker
       coordinate={coordinate}
       onPress={onPress}
-      tracksViewChanges={false}
     >
       <View style={styles.shadowContainer}>
         <View style={[styles.innerCircle, { backgroundColor, borderColor }]}>

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, Alert } from 'react-native';
+import { StyleSheet, View, Text, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import MapView from 'react-native-map-clustering';
 import FieldInfoModal from './src/components/FieldInfoModal';
 import AddFieldModal from './src/components/AddFieldModal';
 import NearbyFilter from './src/components/NearbyFilter';
-import CustomImageMarker from './src/components/CustomImageMarker';
+import MapArea from './src/components/MapArea';
+import AddButton from './src/components/AddButton';
 import { initialSoccerFields } from './src/data/soccerFields';
 
 export default function App() {
@@ -20,14 +20,7 @@ export default function App() {
   const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
   const [nearbyOnly, setNearbyOnly] = useState(false);
   const [radiusKm, setRadiusKm] = useState(5);
-
-  // Coordenadas del centro de Rosario
-  const ROSARIO_CENTER = {
-    latitude: -32.9442,
-    longitude: -60.6505,
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.1,
-  };
+  
 
   const handleMarkerPress = (field) => {
     if (!addingMode) {
@@ -36,30 +29,14 @@ export default function App() {
     }
   };
 
-  const handleMapPress = (event) => {
-    if (addingMode) {
-      const { latitude, longitude } = event.nativeEvent.coordinate;
-      setSelectedLocation({ latitude, longitude });
-      setShowAddModal(true);
-    }
+  const handleStartAddAtLocation = ({ latitude, longitude }) => {
+    setSelectedLocation({ latitude, longitude });
+    setShowAddModal(true);
   };
 
-  // Haversine formula to compute distance in kilometers
-  const distanceKm = (lat1, lon1, lat2, lon2) => {
-    const toRad = (deg) => (deg * Math.PI) / 180;
-    const R = 6371; // Earth radius km
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
+  
 
   const handleAddField = (newField) => {
-    // Simulamos llamada a API POST /fields
     fetch('http://192.168.18.39:3000/fields', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -77,7 +54,6 @@ export default function App() {
         Alert.alert('¡Éxito!', 'Cancha agregada correctamente');
       })
       .catch(() => {
-        // Si falla, guardamos localmente como fallback
         setSoccerFields((prev) => [...prev, newField]);
         setShowAddModal(false);
         setAddingMode(false);
@@ -87,7 +63,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Intentamos cargar desde la API, si falla usamos los datos iniciales
+    
     fetch('http://192.168.18.39:3000/fields')
       .then((res) => res.json())
       .then((data) => {
@@ -125,68 +101,23 @@ export default function App() {
     }
   };
 
+  
+
+  
+
   return (
-    <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        onPress={handleMapPress}
-        mapRef={() => {}}
-        initialRegion={currentLocation ? {
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        } : ROSARIO_CENTER}
-      >
-        {Array.isArray(soccerFields) && soccerFields.filter((field) => {
-          if (!field) return false;
-          // ensure numeric coords
-          const lat = parseFloat(field.latitude);
-          const lon = parseFloat(field.longitude);
-          if (Number.isNaN(lat) || Number.isNaN(lon)) return false;
-          if (!nearbyOnly || !currentLocation) return true;
-          const d = distanceKm(currentLocation.latitude, currentLocation.longitude, lat, lon);
-          return d <= radiusKm;
-        }).map((field) => {
-          if (!field) return null;
-          const lat = parseFloat(field.latitude);
-          const lon = parseFloat(field.longitude);
-          const d = currentLocation ? distanceKm(currentLocation.latitude, currentLocation.longitude, lat, lon) : null;
-          const desc = d ? `${field.type} — ${d.toFixed(1)} km` : field.type;
-          return (
-            <CustomImageMarker
-              key={field.id || Math.random().toString()}
-              coordinate={{ latitude: lat, longitude: lon }}
-              type="field"
-              sport={field.type}
-              title={field.name || 'Cancha'}
-              description={desc}
-              onPress={() => handleMarkerPress(field)}
-            />
-          );
-        })}
+    <View style={styles.container}>    
+      <MapArea
+        soccerFields={soccerFields}
+        currentLocation={currentLocation}
+        nearbyOnly={nearbyOnly}
+        radiusKm={radiusKm}
+        addingMode={addingMode}
+        onStartAddAtLocation={handleStartAddAtLocation}
+        onSelectField={(f) => { setSelectedField(f); setShowInfoModal(true); }}
+      />
 
-        {selectedLocation && (
-          <CustomImageMarker coordinate={selectedLocation} type="field" title="Nueva ubicación" />
-        )}
-
-        {currentLocation && (
-          <CustomImageMarker coordinate={currentLocation} type="user" title="Tu ubicación" />
-        )}
-      </MapView>
-
-      {/* Botón para activar modo agregar */}
-      <TouchableOpacity
-        style={[
-          styles.addButton,
-          addingMode && styles.addButtonActive
-        ]}
-        onPress={toggleAddingMode}
-      >
-        <Text style={styles.addButtonText}>
-          {addingMode ? '✕ Cancelar' : '➕ Agregar Cancha'}
-        </Text>
-      </TouchableOpacity>
+      <AddButton addingMode={addingMode} toggleAddingMode={toggleAddingMode} />
 
       <NearbyFilter
         nearbyOnly={nearbyOnly}
@@ -247,6 +178,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  
   addButton: {
     position: 'absolute',
     bottom: 30,
