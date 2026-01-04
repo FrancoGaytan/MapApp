@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Marker } from '@react-native-maplibre/maps';
+import MapLibreGL from '@maplibre/maplibre-react-native';
 
 const CustomImageMarker = memo(({ coordinate, title, description, onPress, type = 'field', sport }) => {
   // Define styles based on type
@@ -25,13 +25,17 @@ const CustomImageMarker = memo(({ coordinate, title, description, onPress, type 
   }
 
   return (
-    <Marker coordinate={coordinate} onPress={onPress} anchor={{ x: 0.5, y: 0.5 }}>
+    <MapLibreGL.PointAnnotation
+      id={`marker-${coordinate.latitude}-${coordinate.longitude}`}
+      coordinate={[coordinate.longitude, coordinate.latitude]}
+      onSelected={onPress}
+    >
       <View style={styles.shadowContainer}>
         <View style={[styles.innerCircle, { backgroundColor, borderColor }]}>
           <Text style={styles.markerIcon}>{icon}</Text>
         </View>
       </View>
-    </Marker>
+    </MapLibreGL.PointAnnotation>
   );
 });
 
