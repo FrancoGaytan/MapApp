@@ -130,6 +130,7 @@ export default function App() {
       <MapView
         style={styles.map}
         onPress={handleMapPress}
+        mapRef={() => {}}
         initialRegion={currentLocation ? {
           latitude: currentLocation.latitude,
           longitude: currentLocation.longitude,
