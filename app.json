@@ -41,6 +41,15 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Permitir a MapApp acceder a tu ubicación para mostrarte canchas cercanas."
         }
+      ],
+      [
+        "@config-plugins/react-native-android-permissions",
+        {
+          "permissions": [
+            "ACCESS_FINE_LOCATION",
+            "ACCESS_COARSE_LOCATION"
+          ]
+        }
       ]
     ]
   }
