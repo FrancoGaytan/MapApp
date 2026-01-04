@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import MapView from 'react-native-maps';
+import MapView from '@react-native-maplibre/maps';
 import FieldInfoModal from './src/components/FieldInfoModal';
 import AddFieldModal from './src/components/AddFieldModal';
 import NearbyFilter from './src/components/NearbyFilter';
