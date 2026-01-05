@@ -120,11 +120,3 @@ npm start        # inicia Expo
 - Si la app no recibe la ubicación en un dispositivo real: revisar permisos del sistema (Settings → App → Permisos) y el firewall que podría bloquear el acceso al servidor local.
 - Si el filtro no funciona: verificar que `currentLocation` tenga valores válidos (`console.log`) y que las coordenadas de las canchas sean números (no strings).
 
----
-
-Si querés, puedo:
-
-- Añadir un script para detectar la IP de la máquina automáticamente y reemplazarla en `App.js` para pruebas con Expo Go.
-- Generar pequeñas pruebas unitarias para la función `distanceKm`.
-
-Archivo creado: [DOCUMENTACION.md](DOCUMENTACION.md)
