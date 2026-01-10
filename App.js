@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import MapView from 'react-native-maps';
+import MapView, { UrlTile } from 'react-native-maps';
 import FieldInfoModal from './src/components/FieldInfoModal';
 import AddFieldModal from './src/components/AddFieldModal';
 import NearbyFilter from './src/components/NearbyFilter';
@@ -21,7 +21,6 @@ export default function App() {
   const [nearbyOnly, setNearbyOnly] = useState(false);
   const [radiusKm, setRadiusKm] = useState(5);
 
-  // Coordenadas del centro de Rosario
   const ROSARIO_CENTER = {
     latitude: -32.9442,
     longitude: -60.6505,
@@ -137,6 +136,12 @@ export default function App() {
         } : ROSARIO_CENTER}
         onPress={handleMapPress}
       >
+        <UrlTile
+          urlTemplate="https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+          maximumZ={19}
+          flipY={false}
+        />
+        
         {Array.isArray(soccerFields) && soccerFields.filter((field) => {
           if (!field) return false;
           // ensure numeric coords

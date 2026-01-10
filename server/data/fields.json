@@ -97,5 +97,16 @@
     "phone": "No disponible",
     "price": "$7000/hora",
     "description": "Solo socios"
+  },
+  {
+    "id": "1767655183547",
+    "name": "Padre Claret",
+    "address": "Paraguay 2424",
+    "latitude": -32.964764281471865,
+    "longitude": -60.6489471718669,
+    "type": "Fútbol 7",
+    "phone": "No disponible",
+    "price": "60000",
+    "description": "Sin descripción"
   }
 ]
