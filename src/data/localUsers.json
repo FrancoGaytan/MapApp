@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "email": "test@test.com",
+    "password": "password123",
+    "username": "Test User"
+  },
+  {
+    "id": "2",
+    "email": "admin@mapapp.com",
+    "password": "admin",
+    "username": "Admin"
+  }
+]
