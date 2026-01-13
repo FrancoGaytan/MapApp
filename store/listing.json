@@ -1,0 +1,10 @@
+{
+  "title": "MapApp - Canchas de Fútbol",
+  "shortTitle": "MapApp",
+  "shortDescription": "Encuentra y comparte canchas de fútbol en Rosario y alrededores",
+  "longDescription": "MapApp te permite descubrir canchas de fútbol cerca de ti en la ciudad de Rosario. Filtra por distancia, tipo de cancha y descubre datos útiles como precio y contacto. Agrega nuevas canchas tocando el mapa y comparte ubicaciones con amigos.",
+  "whatIsNew": "Versión inicial: mapa interactivo, filtros por proximidad, agregar canchas y autenticación básica.",
+  "category": "Maps & Navigation",
+  "contactEmail": "mapapp.support@gmail.com",
+  "privacyPolicyUrl": "https://yourdomain.com/privacy.html"
+}

@@ -7,13 +7,18 @@ import FieldInfoModal from './src/components/FieldInfoModal';
 import AddFieldModal from './src/components/AddFieldModal';
 import NearbyFilter from './src/components/NearbyFilter';
 import CustomImageMarker from './src/components/CustomImageMarker';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import LoginScreen from './src/screens/LoginScreen';
+import SignupScreen from './src/screens/SignupScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 import { initialSoccerFields } from './src/data/soccerFields';
+import ApiConnector from './src/config/ApiConnector';
 
-export default function App() {
-  const [soccerFields, setSoccerFields] = useState([]);
-  const [selectedField, setSelectedField] = useState(null);
+function MapScreen() {
+  const [soccerFields, setSoccerFields] = useState(initialSoccerFields);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedField, setSelectedField] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [addingMode, setAddingMode] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -58,46 +63,50 @@ export default function App() {
     return R * c;
   };
 
-  const handleAddField = (newField) => {
-    // Simulamos llamada a API POST /fields
-    fetch('http://192.168.18.39:3000/fields', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newField),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Error al guardar');
-        return res.json();
-      })
-      .then((saved) => {
+  const handleAddField = async (newField) => {
+    try {
+      const response = await ApiConnector.makeRequest('/fields', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newField),
+      });
+      
+      if (response.ok) {
+        const saved = await response.json();
         setSoccerFields((prev) => [...prev, saved]);
         setShowAddModal(false);
         setAddingMode(false);
         setSelectedLocation(null);
         Alert.alert('¡Éxito!', 'Cancha agregada correctamente');
-      })
-      .catch(() => {
-        // Si falla, guardamos localmente como fallback
-        setSoccerFields((prev) => [...prev, newField]);
-        setShowAddModal(false);
-        setAddingMode(false);
-        setSelectedLocation(null);
-        Alert.alert('Aviso', 'No se pudo guardar en la API; guardado localmente');
-      });
+      } else {
+        throw new Error('Error al guardar');
+      }
+    } catch (error) {
+      // Si falla, guardamos localmente como fallback
+      setSoccerFields((prev) => [...prev, newField]);
+      setShowAddModal(false);
+      setAddingMode(false);
+      setSelectedLocation(null);
+      Alert.alert('Aviso', 'No se pudo guardar en la API; guardado localmente');
+    }
   };
 
   useEffect(() => {
     // Intentamos cargar desde la API, si falla usamos los datos iniciales
-    fetch('http://192.168.18.39:3000/fields')
-      .then((res) => res.json())
-      .then((data) => {
+    const loadFields = async () => {
+      try {
+        const data = await ApiConnector.makeRequest('/fields');
         if (Array.isArray(data)) {
           setSoccerFields(data);
         } else {
           setSoccerFields(initialSoccerFields);
         }
-      })
-      .catch(() => setSoccerFields(initialSoccerFields));
+      } catch (error) {
+        setSoccerFields(initialSoccerFields);
+      }
+    };
+    
+    loadFields();
   }, []);
 
   useEffect(() => {
@@ -139,7 +148,6 @@ export default function App() {
       >
         {Array.isArray(soccerFields) && soccerFields.filter((field) => {
           if (!field) return false;
-          // ensure numeric coords
           const lat = parseFloat(field.latitude);
           const lon = parseFloat(field.longitude);
           if (Number.isNaN(lat) || Number.isNaN(lon)) return false;
@@ -157,7 +165,7 @@ export default function App() {
               key={field.id || Math.random().toString()}
               coordinate={{ latitude: lat, longitude: lon }}
               type="field"
-                sport={field.type}
+              sport={field.type}
               title={field.name || 'Cancha'}
               description={desc}
               onPress={() => handleMarkerPress(field)}
@@ -174,7 +182,6 @@ export default function App() {
         )}
       </MapView>
 
-      {/* Botón para activar modo agregar */}
       <TouchableOpacity
         style={[
           styles.addButton,
@@ -211,7 +218,6 @@ export default function App() {
         </View>
       )}
 
-      {/* Modal de información */}
       <FieldInfoModal
         visible={showInfoModal}
         field={selectedField}
@@ -221,7 +227,6 @@ export default function App() {
         }}
       />
 
-      {/* Modal para agregar cancha */}
       <AddFieldModal
         visible={showAddModal}
         onClose={() => {
@@ -234,6 +239,63 @@ export default function App() {
 
       <StatusBar style="auto" />
     </View>
+  );
+}
+
+// Main App Component with Authentication Navigation
+function AuthNavigationScreen() {
+  const { isAuthenticated } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState('main'); // 'login', 'signup', 'main', 'profile'
+
+  useEffect(() => {
+    // Set initial screen based on auth status
+    if (isAuthenticated) {
+      setCurrentScreen('main');
+    } else {
+      setCurrentScreen('login');
+    }
+  }, [isAuthenticated]);
+
+  if (isAuthenticated) {
+    return (
+      <View style={styles.container}>
+        {currentScreen === 'main' && <MapScreen />}
+        {currentScreen === 'profile' && (
+          <ProfileScreen onBackToMap={() => setCurrentScreen('main')} />
+        )}
+        
+        {/* Navigation bar for authenticated users */}
+        {currentScreen === 'main' && (
+          <View style={styles.navigationBar}>
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => setCurrentScreen('profile')}
+            >
+              <Text style={styles.navButtonText}>👤 Perfil</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {currentScreen === 'login' && (
+        <LoginScreen onNavigateToSignup={() => setCurrentScreen('signup')} />
+      )}
+      {currentScreen === 'signup' && (
+        <SignupScreen onNavigateToLogin={() => setCurrentScreen('login')} />
+      )}
+    </View>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AuthNavigationScreen />
+    </AuthProvider>
   );
 }
 
@@ -284,62 +346,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  filterBox: {
+  navigationBar: {
     position: 'absolute',
     top: 40,
-    left: 12,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    padding: 10,
-    borderRadius: 10,
-    elevation: 6,
-  },
-  filterButton: {
-    backgroundColor: '#ecf0f1',
+    right: 20,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 15,
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginBottom: 8,
+    paddingHorizontal: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
   },
-  filterButtonActive: {
-    backgroundColor: '#2ecc71',
+  navButton: {
+    paddingVertical: 5,
   },
-  filterText: {
+  navButtonText: {
     color: '#2c3e50',
+    fontSize: 16,
     fontWeight: '600',
   },
-  radiusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  radiusLabel: {
-    marginRight: 8,
-    fontWeight: '600',
-    color: '#34495e',
-  },
-  radiusButton: {
-    backgroundColor: '#ecf0f1',
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    marginRight: 6,
-  },
-  radiusButtonActive: {
-    backgroundColor: '#3498db',
-  },
-  radiusText: {
-    color: '#2c3e50',
-    fontWeight: '600',
-  },
-  refreshButton: {
-    marginTop: 8,
-    backgroundColor: '#95a5a6',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  refreshText: {
-    color: 'white',
-    fontWeight: '600',
-  }
 });

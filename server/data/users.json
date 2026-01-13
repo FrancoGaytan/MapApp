@@ -1,0 +1,16 @@
+[
+  {
+    "id": "3a53ba40-6c71-4757-8452-2838700c2c7f",
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "createdAt": "2026-01-10T14:28:02.253Z"
+  },
+  {
+    "id": "fc3203c4-a931-4800-9317-b973dcde8a42",
+    "name": "Franco Gaytan",
+    "email": "gaytanfranco@gmail.com",
+    "password": "03be61b9794c721dabefb78f65977aab2070f9f37cc6712b757ddd1a28ceb70c",
+    "createdAt": "2026-01-10T14:44:55.094Z"
+  }
+]
