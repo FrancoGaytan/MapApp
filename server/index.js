@@ -33,20 +33,46 @@ const USERS_PATH = process.env.VERCEL
 
 // Function to initialize data in /tmp if it doesn't exist
 function initTmpData() {
-  if (process.env.VERCEL) {
-    const originalFields = path.join(__dirname, 'data', 'fields.json');
-    const originalUsers = path.join(__dirname, 'data', 'users.json');
-    
-    if (!fs.existsSync(DATA_PATH) && fs.existsSync(originalFields)) {
-      fs.copyFileSync(originalFields, DATA_PATH);
+  try {
+    if (process.env.VERCEL) {
+      const originalFields = path.join(__dirname, 'data', 'fields.json');
+      const originalUsers = path.join(__dirname, 'data', 'users.json');
+      
+      const tmpDir = '/tmp';
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+
+      if (fs.existsSync(originalFields)) {
+        const data = fs.readFileSync(originalFields, 'utf8');
+        fs.writeFileSync(DATA_PATH, data);
+      } else if (!fs.existsSync(DATA_PATH)) {
+        fs.writeFileSync(DATA_PATH, '[]');
+      }
+
+      if (fs.existsSync(originalUsers)) {
+        const data = fs.readFileSync(originalUsers, 'utf8');
+        fs.writeFileSync(USERS_PATH, data);
+      } else if (!fs.existsSync(USERS_PATH)) {
+        fs.writeFileSync(USERS_PATH, '[]');
+      }
     }
-    if (!fs.existsSync(USERS_PATH) && fs.existsSync(originalUsers)) {
-      fs.copyFileSync(originalUsers, USERS_PATH);
-    }
+  } catch (err) {
+    console.error('Initalization error:', err);
   }
 }
 
 initTmpData();
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    message: 'Internal Server Error', 
+    error: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+  });
+});
 
 function readData() {
   try {
@@ -165,6 +191,19 @@ app.post('/auth/login', (req, res) => {
   const userResponse = { id: user.id, name: user.name, email: user.email };
   
   res.json({ user: userResponse, token });
+});
+
+app.get('/debug', (req, res) => {
+  res.json({
+    env: process.env.VERCEL ? 'vercel' : 'local',
+    DATA_PATH,
+    USERS_PATH,
+    dataExists: fs.existsSync(DATA_PATH),
+    usersExists: fs.existsSync(USERS_PATH),
+    cwd: process.cwd(),
+    dirname: __dirname,
+    tmpContent: fs.existsSync('/tmp') ? fs.readdirSync('/tmp') : 'no /tmp'
+  });
 });
 
 // GET all fields
