@@ -25,6 +25,7 @@ function MapScreen() {
   const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
   const [nearbyOnly, setNearbyOnly] = useState(false);
   const [radiusKm, setRadiusKm] = useState(5);
+  const [sportFilter, setSportFilter] = useState('Todas');
 
   // Coordenadas del centro de Rosario
   const ROSARIO_CENTER = {
@@ -148,6 +149,14 @@ function MapScreen() {
       >
         {Array.isArray(soccerFields) && soccerFields.filter((field) => {
           if (!field) return false;
+
+          // Filtro por Deporte
+          if (sportFilter !== 'Todas') {
+            const isSoccer = field.type.toLowerCase().includes('fútbol');
+            if (sportFilter === 'Fútbol' && !isSoccer) return false;
+            if (sportFilter === 'Otros' && isSoccer) return false;
+          }
+
           const lat = parseFloat(field.latitude);
           const lon = parseFloat(field.longitude);
           if (Number.isNaN(lat) || Number.isNaN(lon)) return false;
@@ -199,6 +208,8 @@ function MapScreen() {
         setNearbyOnly={setNearbyOnly}
         radiusKm={radiusKm}
         setRadiusKm={setRadiusKm}
+        sportFilter={sportFilter}
+        setSportFilter={setSportFilter}
         onRefresh={async () => {
           try {
             const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });

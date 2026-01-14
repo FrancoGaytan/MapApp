@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-export default function NearbyFilter({ nearbyOnly, setNearbyOnly, radiusKm, setRadiusKm, onRefresh }) {
+export default function NearbyFilter({ 
+    nearbyOnly, 
+    setNearbyOnly, 
+    radiusKm, 
+    setRadiusKm, 
+    onRefresh,
+    sportFilter,
+    setSportFilter 
+  }) {
   const [minimized, setMinimized] = useState(false);
 
   useEffect(() => {
     // if filter is turned off externally, expand so user sees controls
-    if (!nearbyOnly) setMinimized(false);
-  }, [nearbyOnly]);
+    if (!nearbyOnly && sportFilter === 'Todas') setMinimized(false);
+  }, [nearbyOnly, sportFilter]);
 
   if (minimized) {
     return (
       <TouchableOpacity style={styles.chip} onPress={() => setMinimized(false)}>
-        <Text style={styles.chipText}>{nearbyOnly ? `Cercanas ${radiusKm}km` : 'Filtro'}</Text>
+        <Text style={styles.chipText}>
+            {nearbyOnly ? `Cercanas ${radiusKm}km` : sportFilter !== 'Todas' ? sportFilter : 'Filtros'}
+        </Text>
       </TouchableOpacity>
     );
   }
@@ -28,6 +38,19 @@ export default function NearbyFilter({ nearbyOnly, setNearbyOnly, radiusKm, setR
         {[1,3,5].map((r) => (
           <TouchableOpacity key={r} style={[styles.radiusButton, radiusKm === r && styles.radiusButtonActive]} onPress={() => setRadiusKm(r)}>
             <Text style={styles.radiusText}>{r} km</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.sportRow}>
+        <Text style={styles.radiusLabel}>Tipo:</Text>
+        {['Todas', 'Fútbol', 'Otros'].map((s) => (
+          <TouchableOpacity 
+            key={s} 
+            style={[styles.sportButton, sportFilter === s && styles.sportButtonActive]} 
+            onPress={() => setSportFilter(s)}
+          >
+            <Text style={sportFilter === s ? styles.sportTextActive : styles.sportText}>{s}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -52,6 +75,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     elevation: 6,
+    width: 230,
   },
   chip: {
     position: 'absolute',
@@ -81,8 +105,14 @@ const styles = StyleSheet.create({
   filterText: {
     color: '#2c3e50',
     fontWeight: '600',
+    textAlign: 'center',
   },
   radiusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  sportRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
@@ -91,6 +121,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     fontWeight: '600',
     color: '#34495e',
+    width: 45,
   },
   radiusButton: {
     backgroundColor: '#ecf0f1',
@@ -105,6 +136,27 @@ const styles = StyleSheet.create({
   radiusText: {
     color: '#2c3e50',
     fontWeight: '600',
+  },
+  sportButton: {
+    backgroundColor: '#ecf0f1',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    marginRight: 6,
+    minWidth: 45,
+    alignItems: 'center',
+  },
+  sportButtonActive: {
+    backgroundColor: '#e67e22',
+  },
+  sportText: {
+    color: '#2c3e50',
+    fontSize: 12,
+  },
+  sportTextActive: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
   refreshButton: {
     backgroundColor: '#95a5a6',

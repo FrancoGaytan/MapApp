@@ -64,6 +64,7 @@ export default function LoginScreen({ onNavigateToSignup }) {
           onChangeText={setPassword}
           secureTextEntry
           placeholderTextColor="#999"
+          color="#000000"
         />
 
         <TouchableOpacity

@@ -115,6 +115,7 @@ export default function SignupScreen({ onNavigateToLogin }) {
             onChangeText={(value) => handleInputChange('password', value)}
             secureTextEntry
             placeholderTextColor="#999"
+            color="#000000"
           />
 
           <TextInput
@@ -124,6 +125,7 @@ export default function SignupScreen({ onNavigateToLogin }) {
             onChangeText={(value) => handleInputChange('confirmPassword', value)}
             secureTextEntry
             placeholderTextColor="#999"
+            color="#000000"
           />
 
           <TouchableOpacity
