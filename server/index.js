@@ -11,21 +11,16 @@ app.use(cors());
 app.use(express.json());
 
 // Load initial data into memory
-const FIELDS_FILE = path.join(__dirname, 'data', 'fields.json');
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
-
 let fieldsMemory = [];
-let usersMemory = [];
-
 try {
-  if (fs.existsSync(FIELDS_FILE)) {
-    const rawData = fs.readFileSync(FIELDS_FILE, 'utf8');
-    fieldsMemory = JSON.parse(rawData);
-    console.log(`Loaded ${fieldsMemory.length} fields from ${FIELDS_FILE}`);
-  }
+  fieldsMemory = require('./data/fields.json');
+  console.log(`Loaded ${fieldsMemory.length} fields from JSON via require`);
 } catch (e) {
-  console.error('Error loading fields:', e);
+  console.error('Error loading fields via require:', e);
 }
+
+const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+let usersMemory = [];
 
 try {
   if (fs.existsSync(USERS_FILE)) {
@@ -37,7 +32,8 @@ try {
 
 app.get('/health', (req, res) => res.json({ 
   status: 'ok', 
-  version: '1.0.1',
+  version: '1.0.2',
+  message: 'REDEPLOY_FORCE_30_FIELDS',
   runtime: process.env.VERCEL ? 'vercel' : 'local',
   fieldsCount: fieldsMemory.length 
 }));
