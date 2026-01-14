@@ -33,7 +33,12 @@ try {
   console.error('Error loading users:', e);
 }
 
-app.get('/health', (req, res) => res.json({ status: 'ok', runtime: process.env.VERCEL ? 'vercel' : 'local' }));
+app.get('/health', (req, res) => res.json({ 
+  status: 'ok', 
+  version: '1.0.1',
+  runtime: process.env.VERCEL ? 'vercel' : 'local',
+  fieldsCount: fieldsMemory.length 
+}));
 
 app.get('/fields', (req, res) => {
   res.json(fieldsMemory);
