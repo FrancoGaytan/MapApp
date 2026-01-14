@@ -32,8 +32,9 @@ try {
 
 app.get('/health', (req, res) => res.json({ 
   status: 'ok', 
-  version: '1.0.3',
-  message: 'REDEPLOY_FORCE_30_FIELDS_V3',
+  version: '1.0.4',
+  message: 'SYNC_WITH_ROOT_DIR',
+  fieldsCount: fieldsMemory.length
 }));
 
 app.get('/fields', (req, res) => {
