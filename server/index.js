@@ -24,8 +24,29 @@ app.use((req, res, next) => {
   next();
 });
 
-const DATA_PATH = path.join(__dirname, 'data', 'fields.json');
-const USERS_PATH = path.join(__dirname, 'data', 'users.json');
+const DATA_PATH = process.env.VERCEL 
+  ? path.join('/tmp', 'fields.json')
+  : path.join(__dirname, 'data', 'fields.json');
+const USERS_PATH = process.env.VERCEL
+  ? path.join('/tmp', 'users.json')
+  : path.join(__dirname, 'data', 'users.json');
+
+// Function to initialize data in /tmp if it doesn't exist
+function initTmpData() {
+  if (process.env.VERCEL) {
+    const originalFields = path.join(__dirname, 'data', 'fields.json');
+    const originalUsers = path.join(__dirname, 'data', 'users.json');
+    
+    if (!fs.existsSync(DATA_PATH) && fs.existsSync(originalFields)) {
+      fs.copyFileSync(originalFields, DATA_PATH);
+    }
+    if (!fs.existsSync(USERS_PATH) && fs.existsSync(originalUsers)) {
+      fs.copyFileSync(originalUsers, USERS_PATH);
+    }
+  }
+}
+
+initTmpData();
 
 function readData() {
   try {
