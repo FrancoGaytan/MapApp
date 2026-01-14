@@ -29,28 +29,61 @@ const USERS_PATH = path.join(__dirname, 'data', 'users.json');
 
 function readData() {
   try {
-    const raw = fs.readFileSync(DATA_PATH, 'utf8');
-    return JSON.parse(raw);
+    if (!fs.existsSync(DATA_PATH)) {
+      return [];
+    }
+    const raw = fs.readFileSync(DATA_PATH, 'utf8').trim();
+    if (!raw) return [];
+    
+    // Attempt to fix common accidental truncation during write
+    let sanitized = raw;
+    if (sanitized.endsWith('}') && !sanitized.endsWith('}]')) {
+       sanitized += ']';
+    }
+    
+    return JSON.parse(sanitized);
   } catch (e) {
+    console.error('Error reading data:', e);
     return [];
   }
 }
 
 function writeData(arr) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(arr, null, 2), 'utf8');
+  try {
+    const dir = path.dirname(DATA_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(DATA_PATH, JSON.stringify(arr), 'utf8');
+  } catch (e) {
+    console.error('Error writing data:', e);
+  }
 }
 
 function readUsers() {
   try {
-    const raw = fs.readFileSync(USERS_PATH, 'utf8');
+    if (!fs.existsSync(USERS_PATH)) {
+      return [];
+    }
+    const raw = fs.readFileSync(USERS_PATH, 'utf8').trim();
+    if (!raw) return [];
     return JSON.parse(raw);
   } catch (e) {
+    console.error('Error reading users:', e);
     return [];
   }
 }
 
 function writeUsers(users) {
-  fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2), 'utf8');
+  try {
+    const dir = path.dirname(USERS_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(USERS_PATH, JSON.stringify(users), 'utf8');
+  } catch (e) {
+    console.error('Error writing users:', e);
+  }
 }
 
 function hashPassword(password) {
