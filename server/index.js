@@ -32,10 +32,8 @@ try {
 
 app.get('/health', (req, res) => res.json({ 
   status: 'ok', 
-  version: '1.0.2',
-  message: 'REDEPLOY_FORCE_30_FIELDS',
-  runtime: process.env.VERCEL ? 'vercel' : 'local',
-  fieldsCount: fieldsMemory.length 
+  version: '1.0.3',
+  message: 'REDEPLOY_FORCE_30_FIELDS_V3',
 }));
 
 app.get('/fields', (req, res) => {
