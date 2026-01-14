@@ -98,6 +98,7 @@ function MapScreen() {
       try {
         const data = await ApiConnector.makeRequest('/fields');
         if (Array.isArray(data)) {
+          console.log(`Loaded ${data.length} fields from API`);
           setSoccerFields(data);
         } else {
           setSoccerFields(initialSoccerFields);

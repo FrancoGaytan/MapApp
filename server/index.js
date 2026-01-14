@@ -19,7 +19,9 @@ let usersMemory = [];
 
 try {
   if (fs.existsSync(FIELDS_FILE)) {
-    fieldsMemory = JSON.parse(fs.readFileSync(FIELDS_FILE, 'utf8'));
+    const rawData = fs.readFileSync(FIELDS_FILE, 'utf8');
+    fieldsMemory = JSON.parse(rawData);
+    console.log(`Loaded ${fieldsMemory.length} fields from ${FIELDS_FILE}`);
   }
 } catch (e) {
   console.error('Error loading fields:', e);

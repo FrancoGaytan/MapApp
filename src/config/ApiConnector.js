@@ -45,7 +45,7 @@ class ApiConnector {
       this.workingUrl = await this.findWorkingUrl();
     }
     
-    const url = `${this.workingUrl}${endpoint}`;
+    const url = `${this.workingUrl}${endpoint}${endpoint.includes('?') ? '&' : '?'}t=${Date.now()}`;
     console.log(`Making request to: ${url}`);
     
     try {
