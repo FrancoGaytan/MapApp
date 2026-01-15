@@ -27,7 +27,7 @@ function MapScreen() {
   const [radiusKm, setRadiusKm] = useState(5);
   const [sportFilter, setSportFilter] = useState('Todas');
 
-  // Coordenadas del centro de Rosario
+  // Constante con las coordenadas por defecto del centro de Rosario (Fallback)
   const ROSARIO_CENTER = {
     latitude: -32.9442,
     longitude: -60.6505,
@@ -35,6 +35,7 @@ function MapScreen() {
     longitudeDelta: 0.1,
   };
 
+  // Manejador al tocar un marcador (abre el modal de info)
   const handleMarkerPress = (field) => {
     if (!addingMode) {
       setSelectedField(field);
@@ -42,6 +43,7 @@ function MapScreen() {
     }
   };
 
+  // Manejador al tocar cualquier parte del mapa (usado para agregar canchas)
   const handleMapPress = (event) => {
     if (addingMode) {
       const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -50,10 +52,12 @@ function MapScreen() {
     }
   };
 
-  // Haversine formula to compute distance in kilometers
+  /**
+   * Fórmula de Haversine para calcular la distancia entre dos puntos GPS en KM
+   */
   const distanceKm = (lat1, lon1, lat2, lon2) => {
     const toRad = (deg) => (deg * Math.PI) / 180;
-    const R = 6371; // Earth radius km
+    const R = 6371; // Radio de la Tierra en km
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a =
@@ -64,6 +68,9 @@ function MapScreen() {
     return R * c;
   };
 
+  /**
+   * Envía una nueva cancha a la API para persistirla
+   */
   const handleAddField = async (newField) => {
     try {
       const response = await ApiConnector.makeRequest('/fields', {
@@ -83,7 +90,7 @@ function MapScreen() {
         throw new Error('Error al guardar');
       }
     } catch (error) {
-      // Si falla, guardamos localmente como fallback
+      // Si falla la conexión a Vercel, guardamos en la memoria local como fallback
       setSoccerFields((prev) => [...prev, newField]);
       setShowAddModal(false);
       setAddingMode(false);
@@ -92,8 +99,16 @@ function MapScreen() {
     }
   };
 
+  // Alterna el modo de "agregar cancha"
+  const toggleAddingMode = () => {
+    setAddingMode(!addingMode);
+    if (addingMode) {
+      setSelectedLocation(null);
+    }
+  };
+
+  // Carga inicial de datos desde la API (Vercel)
   useEffect(() => {
-    // Intentamos cargar desde la API, si falla usamos los datos iniciales
     const loadFields = async () => {
       try {
         const data = await ApiConnector.makeRequest('/fields');
@@ -104,6 +119,7 @@ function MapScreen() {
           setSoccerFields(initialSoccerFields);
         }
       } catch (error) {
+        // Si no hay internet o falla el servidor, cargamos las canchas fijas de fallback
         setSoccerFields(initialSoccerFields);
       }
     };
@@ -111,6 +127,7 @@ function MapScreen() {
     loadFields();
   }, []);
 
+  // Obtención de la ubicación actual del usuario y permisos de GPS
   useEffect(() => {
     (async () => {
       try {
@@ -129,12 +146,6 @@ function MapScreen() {
     })();
   }, []);
 
-  const toggleAddingMode = () => {
-    setAddingMode(!addingMode);
-    if (addingMode) {
-      setSelectedLocation(null);
-    }
-  };
 
   return (
     <View style={styles.container}>
