@@ -18,8 +18,15 @@ Estos paquetes ya están instalados en el proyecto y aparecen en `package.json`.
 - `src/components/AddFieldModal.js`: formulario para agregar una nueva cancha (usa la ubicación seleccionada en el mapa).
 - `src/components/NearbyFilter.js`: control para activar el filtro de canchas cercanas, elegir radio y actualizar ubicación.
 - `src/data/soccerFields.js`: datos iniciales locales (fallback si la API no está disponible).
-- `server/index.js`: API de ejemplo (endpoints `GET /fields` y `POST /fields`).
-- `server/data/fields.json`: persistencia simple en JSON para simular una base de datos.
+- `server/index.js`: API oficial desplegada en Vercel (endpoints `GET /fields`, `POST /fields`, `POST /auth/login`, `POST /auth/signup`).
+- `server/data/fields.json`: Datos iniciales con 30 locaciones reales de Rosario.
+- `server/data/users.json`: Archivo para persistir usuarios de forma local/memoria.
+
+## 2.1) Autenticación y Backend
+Se optó por una solución personalizada en **Express** en lugar de Better Auth o Firebase para mantener el proyecto ligero y bajo control total:
+- **Encriptación:** Las contraseñas se hashean con SHA-256 en el servidor.
+- **Gestión de Sesión:** El servidor valida credenciales y devuelve un token de sesión que el cliente guarda en `AsyncStorage`.
+- **Hosting:** Backend en Vercel (conectado a la subcarpeta `/server`).
 
 ## 3) Uso básico de `react-native-maps`
 

@@ -1,273 +1,94 @@
-# 🚀 Guía de Deployment a Google Play Store
+# 🚀 Guía Completa de Deployment (Full-Stack)
 
-## 📱 Proceso de Build y Deploy a Play Store
+Esta guía detalla el proceso exacto que seguimos para desplegar **MapApp - Canchas Rosario**, cubriendo el Backend (Vercel), el Frontend (Expo/EAS) y los requisitos legales (GitHub Pages).
 
-### Paso 1: Preparar Cuenta de Google Play Console
-1. Ir a https://play.google.com/console
-2. Crear cuenta de desarrollador ($25 USD pago único)
-3. Completar información de la cuenta
+---
 
-### Paso 2: Instalar EAS CLI (Expo Application Services)
+## 🌐 1. Backend: API Express en Vercel
+
+### Conexión con GitHub
+Para que los cambios se actualicen automáticamente:
+1. Sube el código a GitHub (`git push origin master`).
+2. En el panel de **Vercel**, crea un nuevo proyecto e impórtalo desde GitHub.
+3. **CONFIGURACIÓN CRÍTICA:** 
+   - Ve a **Settings > General**.
+   - En **Root Directory**, escribe `server`. Esto le indica a Vercel que el código del servidor está en esa carpeta específica.
+   - En **Build & Development Settings**, verifica que el Framework Preset sea "Other" o "Express" (Vercel lo detecta automáticamente).
+
+### Manejo de Datos (JSON)
+En entornos serverless como Vercel, el sistema de archivos es de solo lectura en ejecución. 
+- **Lectura de datos iniciales:** Usamos `fieldsMemory = require('./data/fields.json');`. El uso de `require` asegura que el JSON se incluya en el despliegue de Vercel.
+- **Persistencia:** En este MVP, los datos nuevos (canchas agregadas) se guardan en la memoria RAM del servidor. *Nota: Se reinician si el servidor entra en reposo.* Para producción real, se recomienda conectar una base de datos como MongoDB o PostgreSQL.
+
+---
+
+## 📄 2. Requisitos Legales: Política de Privacidad
+
+Google Play exige obligatoriamente un link público para la política de privacidad.
+1. El archivo se encuentra en `docs/PRIVACY_POLICY.html`.
+2. **Hosting vía GitHub Pages:**
+   - Ve a tu repositorio en GitHub -> **Settings > Pages**.
+   - En "Build and deployment", selecciona la rama `master` y la carpeta `/docs`.
+3. **Link Oficial:** `https://francogaytan.github.io/MapApp/PRIVACY_POLICY.html`
+   *Este link es el que debes pegar en Google Play Console > Contenido de la app > Política de privacidad.*
+
+---
+
+## 📱 3. Frontend: App en Expo (EAS Build)
+
+### Preparación del `app.json`
+Antes de compilar, cada nueva subida requiere:
+- `"version": "1.0.1"` (Visible para el usuario).
+- `"versionCode": 3` (Número interno, debe ser mayor al anterior).
+- **Google Maps Key:** Asegúrate de tener tu API Key en `android.config.googleMaps.apiKey`.
+
+### Comandos de Compilación
+Usamos **EAS (Expo Application Services)**:
 
 ```bash
-# Instalar EAS CLI
-npm install -g eas-cli
-
-# Login en tu cuenta de Expo
+# PASO A: Login (si no lo estás)
 eas login
+
+# PASO B: Para probar (Genera un APK para instalar manualmente)
+eas build --profile preview --platform android
+
+# PASO C: Para la tienda (Genera un AAB - Android App Bundle)
+eas build --profile production --platform android
 ```
-
-### Paso 3: Configurar EAS Build
-
-```bash
-# Inicializar configuración de build
-eas build:configure
-```
-
-Esto crea un archivo `eas.json` con:
-
-```json
-{
-  "build": {
-    "preview": {
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "production": {
-      "android": {
-        "buildType": "app-bundle"
-      }
-    }
-  }
-}
-```
-
-### Paso 4: Crear Keystore (Firma de la app)
-
-```bash
-# EAS genera automáticamente tu keystore
-eas credentials
-```
-
-Selecciona:
-- Android
-- Production
-- Set up a new keystore
-
-**¡IMPORTANTE!** Guarda las credenciales que te genera, las necesitarás para futuras actualizaciones.
-
-### Paso 5: Build de Producción
-
-```bash
-# Build para Google Play Store (AAB - Android App Bundle)
-eas build --platform android --profile production
-
-# Esto puede tardar 10-20 minutos
-# Al finalizar te da un link para descargar el .aab
-```
-
-### Paso 6: Preparar Assets para Play Store
-
-Antes de subir, necesitas:
-
-**1. Ícono de la app (512x512 px)**
-- Crear un ícono cuadrado de alta calidad
-- Formato PNG, sin transparencias
-
-**2. Screenshots (mínimo 2)**
-- Capturas de pantalla de tu app funcionando
-- Resoluciones: 
-  - Teléfono: 1080x1920 o 1080x2400
-  - Tablet (opcional): 1200x1920
-
-**3. Feature Graphic (1024x500 px)**
-- Banner horizontal promocional
-- Formato PNG o JPG
-
-**4. Descripción de la app**
-```
-Título corto (máx 50 caracteres):
-MapApp - Canchas de Fútbol
-
-Descripción corta (máx 80 caracteres):
-Encuentra y comparte canchas de fútbol en Rosario
-
-Descripción larga (máx 4000 caracteres):
-MapApp te permite descubrir canchas de fútbol cerca de ti en la ciudad de Rosario.
-
-Características:
-• Mapa interactivo con todas las canchas de la ciudad
-• Filtro por proximidad a tu ubicación
-• Agrega nuevas canchas que encuentres
-• Información detallada de cada cancha
-• Sistema de autenticación de usuarios
-
-¡Descarga MapApp y nunca más te quedarás sin lugar para jugar!
-```
-
-### Paso 7: Subir a Google Play Console
-
-1. **Ir a Play Console** → https://play.google.com/console
-2. **Crear nueva aplicación**
-   - Nombre: MapApp - Canchas Rosario
-   - Idioma predeterminado: Español
-   - Tipo: App o Juego → App
-   - Categoría: Mapas y navegación
-
-3. **Configurar ficha de Play Store**
-   - Subir ícono (512x512)
-   - Subir Feature Graphic (1024x500)
-   - Agregar screenshots (mínimo 2)
-   - Completar descripción corta y larga
-   - Agregar categoría: Mapas y navegación
-
-4. **Configurar clasificación de contenido**
-   - Completar cuestionario
-   - Para MapApp: "Todos"
-
-5. **Política de privacidad**
-   - Necesitas crear una (puedes usar generadores online)
-   - Ejemplo: https://app-privacy-policy-generator.firebaseapp.com/
-
-6. **Subir el AAB**
-   - Ir a "Producción" → "Crear nueva versión"
-   - Subir el archivo .aab descargado de EAS
-   - Agregar notas de la versión
-
-7. **Enviar para revisión**
-   - Revisar toda la información
-   - Enviar para revisión
-   - **Espera: 1-7 días** para aprobación
-
-### Paso 8: Actualizaciones futuras
-
-Cuando quieras actualizar la app:
-
-**1. Incrementar versión en app.json**
-```json
-{
-  "expo": {
-    "version": "1.0.1",  // ← Cambiar aquí
-    "android": {
-      "versionCode": 2   // ← Incrementar siempre +1
-    }
-  }
-}
-```
-
-**2. Hacer nuevo build**
-```bash
-eas build --platform android --profile production
-```
-
-**3. Subir nueva versión en Play Console**
-- Ir a "Producción" → "Crear nueva versión"
-- Subir nuevo .aab
-- Agregar notas de qué cambió
 
 ---
 
-## 🔧 Testing antes de publicar
+## 🏪 4. Proceso en Google Play Console
 
-### Probar en APK local (sin subir a Play Store)
+### Subida del Archivo
+1. Descarga el archivo `.aab` desde el enlace que te da Expo al finalizar el build.
+2. En la consola de Google Play, ve a **Pruebas internas** (para testeo rápido) o **Producción**.
+3. Sube el archivo `.aab`.
+4. **Notas de versión:** Describe los cambios (ej: "Añadidas 30 canchas de Rosario"). Usa la etiqueta `<es-419>` para español latino.
 
-```bash
-# Build de preview (APK para testing)
-eas build --platform android --profile preview
-
-# Instalar en tu teléfono físico
-# 1. Descargar el APK del link que te da EAS
-# 2. Transferir a tu teléfono
-# 3. Instalar (necesitas habilitar "Fuentes desconocidas")
-```
-
-### Testing interno en Play Console
-
-1. En Play Console → "Testing" → "Testing interno"
-2. Crear versión de prueba
-3. Agregar testers (emails)
-4. Ellos pueden descargar desde Play Store (versión beta)
+### Ficha de Play Store (Assets Necesarios)
+- **Icono:** 512x512 pxl PNG.
+- **Imagen de cabecera:** 1024x500 pxl.
+- **Capturas de pantalla:** Saca al menos 2 screenshots de la app (Mapa y Login).
+- **Categoría:** Mapas y navegación / Deportes.
 
 ---
 
-## 📝 Checklist antes de publicar
+## 🛠️ Solución de Problemas (Troubleshooting)
 
-- [ ] ¿Servidor deployado en la nube? (Vercel/Railway/Firebase)
-- [ ] ¿URLs del servidor actualizadas en el código?
-- [ ] ¿Ícono de 512x512 creado?
-- [ ] ¿Mínimo 2 screenshots tomados?
-- [ ] ¿Feature graphic de 1024x500 creado?
-- [ ] ¿Descripción escrita?
-- [ ] ¿Política de privacidad creada?
-- [ ] ¿Cuenta de Play Console creada ($25 USD)?
-- [ ] ¿App testeada con APK en dispositivo real?
-- [ ] ¿Permisos de ubicación funcionando?
-- [ ] ¿Login/Signup funcionando con servidor en la nube?
+- **¿El mapa se ve gris?** 
+  - Verifica que la API Key de Google Maps esté habilitada en Google Cloud Console.
+  - El nombre del paquete (`com.mapapp.rosario`) debe coincidir exactamente en la consola de Google Cloud y en `app.json`.
+- **¿Los datos no se actualizan?**
+  - Hemos implementado un sistema de "cache-busting" en `ApiConnector.js` que añade un timestamp (`?t=...`) a las URLs. Esto obliga a la App a pedir datos frescos al servidor cada vez.
+- **¿Vercel no despliega mis cambios de GitHub?**
+  - Ve a la pestaña **Deployments** en Vercel, busca el último commit y dale a **"Redeploy"** o **"Promote to Production"**.
 
 ---
-
-## 💰 Costos
-
-- **Google Play Console**: $25 USD (pago único)
-- **Expo/EAS Build**: 
-  - Gratis: 30 builds/mes
-  - Si necesitas más: $29/mes
-- **Hosting del servidor**:
-  - Vercel: GRATIS
-  - Railway: GRATIS (hasta cierto uso)
-  - Render: GRATIS
-  - Heroku: GRATIS/Limitado
-  - VPS (DigitalOcean/Linode): ~$5/mes
-
-**Total mínimo**: $25 USD + tiempo
+*Documento actualizado el 15 de Enero de 2026 para reflejar el proceso real seguido durante el desarrollo.*
 
 ---
-
-## 🆘 Problemas comunes
-
-### "App no se conecta al servidor"
-→ Revisa que el servidor esté deployado y la URL actualizada en `api.js`
-
-### "Keystore perdido"
-→ Si pierdes el keystore, NO podrás actualizar la app. Tendrás que publicar una nueva.
-
-### "Build falla en EAS"
-→ Revisa logs, usualmente es por:
-- package.json mal configurado
-- Versión de Node incorrecta
-- Dependencias faltantes
-
-### "Play Console rechaza la app"
-→ Razones comunes:
-- Falta política de privacidad
-- Contenido inapropiado
-- Permisos mal explicados
-- Screenshots de mala calidad
-
----
-
-## 📚 Recursos útiles
-
-- Expo Docs: https://docs.expo.dev/
-- EAS Build: https://docs.expo.dev/build/introduction/
-- Play Console: https://support.google.com/googleplay/android-developer
+*Documento actualizado el 15 de Enero de 2026 para reflejar el proceso real seguido durante el desarrollo.*
 - Generador de Privacy Policy: https://app-privacy-policy-generator.firebaseapp.com/
 - Vercel Docs: https://vercel.com/docs
 - Railway Docs: https://docs.railway.app/
-
----
-
-## 🎯 Próximos pasos recomendados
-
-1. **Deploy del servidor primero** (sin esto la app no funcionará para usuarios externos)
-2. Testear con APK en tu teléfono
-3. Crear assets visuales (ícono, screenshots)
-4. Crear cuenta Play Console
-5. Build de producción con EAS
-6. Subir a Play Store en testing interno
-7. Invitar testers
-8. Corregir bugs
-9. Publicar en producción
-
-**¡Éxito con tu app! 🚀**
